@@ -1,5 +1,5 @@
 import random
-import balaboba
+from omd import balaboba
 import weather
 
 
