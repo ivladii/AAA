@@ -1,5 +1,5 @@
 import random
-from omd import balaboba
+import balaboba
 import weather
 
 
@@ -53,7 +53,11 @@ def step1() -> str:
     return step2_no_umbrella(is_rain)
 
 
-if __name__ == '__main__':
+def main():
     history_seed = step1()
     history = balaboba.balaboba(history_seed)
     print(history)
+
+
+if __name__ == '__main__':
+    main()
