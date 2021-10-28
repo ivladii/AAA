@@ -2,7 +2,9 @@ from __future__ import annotations
 
 from itertools import chain
 from collections import Counter
-from typing import Iterable
+from typing import Iterable, List, Union
+import math
+from operator import mul
 
 
 class CountVectorizer:
@@ -10,7 +12,7 @@ class CountVectorizer:
     def __init__(self):
         self.feature_names = []
 
-    def fit_transform(self, raw_documents: Iterable[str]) -> list[list[int]]:
+    def fit_transform(self, raw_documents: Iterable[str]) -> List[List[int]]:
         """
         Составляет список терминов в необработанных документах
         и реобразует документы в терм-документную матрицу
@@ -30,7 +32,7 @@ class CountVectorizer:
 
         return self
 
-    def transform(self, raw_documents: Iterable[str]) -> list[list[int]]:
+    def transform(self, raw_documents: Iterable[str]) -> List[List[int]]:
         """Преобразует документы в терм-документную матрицу"""
         if not isinstance(raw_documents, list):
             raise ValueError('Iterable over raw text documents expected, string object received')
@@ -57,14 +59,85 @@ class CountVectorizer:
         return raw_document.lower().strip(' \t\r\n').split()
 
 
+class TfidfTransformer:
+
+    def __init__(self):
+        pass
+
+    def fit_transform(self, count_matrix: List[List[int]]) -> List[List[float]]:
+        """
+        tfidf-трансформация терм-матрицы
+        """
+        return self.fit().transform(count_matrix)
+
+    def fit(self, *args, **kwargs):
+        return self
+
+    def transform(self, count_matrix: List[List[int]]) -> List[List[float]]:
+        """
+        tfidf-трансформация терм-матрицы
+        """
+        tf_matrix = self.tf_transform(count_matrix)
+        idf_martix = self.idf_transform(count_matrix)
+        tfidf_matrix = [list(map(mul, tf_row, idf_martix)) for tf_row in tf_matrix]
+        return tfidf_matrix
+
+    def tf_transform(self, count_matrix: List[List[int]]) -> List[List[float]]:
+        """
+        Делает tf-трансформацию терм-матрицы
+        """
+
+        return [
+            [word_qty / sum(row) for word_qty in row]
+            for row in count_matrix
+        ]
+
+    def idf_transform(self, count_matrix: List[List[int]]) -> List[float]:
+        """
+        Делает idf-трансформацию терм-матрицы
+        """
+
+        def filter_zero(values: Iterable[int]) -> list:
+            return [val for val in values if val != 0]
+
+        def calc_idf(docs_qty: int, docs_qty_with_perm: int) -> float:
+            return math.log((docs_qty + 1) / (docs_qty_with_perm + 1)) + 1
+
+        term_occurrence = (
+            len(filter_zero(term_qty_per_doc))
+            for term_qty_per_doc in zip(*count_matrix)
+        )
+
+        idf_matrix = [
+            calc_idf(len(count_matrix), docs_qty_with_perm)
+            for docs_qty_with_perm in term_occurrence
+        ]
+
+        return idf_matrix
+
+
+class TfidfVectorizer(CountVectorizer):
+
+    def __init__(self):
+        super().__init__()
+        self.tfidf_transformer = TfidfTransformer()
+
+    def fit_transform(self, raw_documents: Iterable[str]) -> List[List[float]]:
+        """
+        Делает tf-idf трансформацию списка документов
+        """
+
+        count_matrix = super().fit_transform(raw_documents)
+        return self.tfidf_transformer.fit_transform(count_matrix)
+
+
 if __name__ == '__main__':
     corpus = [
         'Crock Pot Pasta Never boil pasta again',
         'Pasta Pomodoro Fresh ingredients Parmesan to taste'
     ]
 
-    vectorizer = CountVectorizer()
-    count_matrix = vectorizer.fit_transform(corpus)
+    tfids_vectorizer = TfidfVectorizer()
+    tfidf_matrix = tfids_vectorizer.fit_transform(corpus)
 
-    print(vectorizer.get_feature_names())
-    print(count_matrix)
+    print(tfidf_matrix)
