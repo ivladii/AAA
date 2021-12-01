@@ -1,0 +1,8 @@
+============================= test session starts ==============================
+platform darwin -- Python 3.9.5, pytest-6.2.5, py-1.11.0, pluggy-1.0.0
+rootdir: /Users/ivladi/Documents/Learning/AAA/Python/AAA/tests/issue-03
+collected 4 items
+
+test_ohe.py ....                                                         [100%]
+
+============================== 4 passed in 0.04s ===============================
