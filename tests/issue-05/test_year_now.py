@@ -8,51 +8,44 @@ import pytest
 
 class TestYearNow:
 
-    @patch('urllib.request.urlopen', io.StringIO)
     def test_dt_sep_hyp(self):
-        fake_api_url = '{"currentDateTime": "2010-11-30 01:06:37.923098"}'
-        with patch('tests.code.what_is_year_now.API_URL', fake_api_url):
+        response = '{"currentDateTime": "2010-11-30 01:06:37.923098"}'
+        with patch('urllib.request.urlopen', return_value=io.StringIO(response)):
             year = what_is_year_now()
 
         exp_year = 2010
 
         assert year == exp_year
 
-    @patch('urllib.request.urlopen', io.StringIO)
     def test_dt_sep_dot(self):
-        fake_api_url = '{"currentDateTime": "30.11.2020 01:06:37.923098"}'
-        with patch('tests.code.what_is_year_now.API_URL', fake_api_url):
+        response = '{"currentDateTime": "30.11.2020 01:06:37.923098"}'
+        with patch('urllib.request.urlopen', return_value=io.StringIO(response)):
             year = what_is_year_now()
         exp_year = 2020
 
         assert year == exp_year
 
-    @patch('urllib.request.urlopen', io.StringIO)
     def test_raise_not_key(self):
-        fake_api_url = '{"DateTime": "30.11.2020 01:06:37.923098"}'
-        with patch('tests.code.what_is_year_now.API_URL', fake_api_url):
+        response = '{"DateTime": "30.11.2020 01:06:37.923098"}'
+        with patch('urllib.request.urlopen', return_value=io.StringIO(response)):
             with pytest.raises(KeyError):
                 what_is_year_now()
 
-    @patch('urllib.request.urlopen', io.StringIO)
     def test_raise_not_sep(self):
-        fake_api_url = '{"currentDateTime": "30/11/2020 01:06:37.923098"}'
-        with patch('tests.code.what_is_year_now.API_URL', fake_api_url):
+        response = '{"currentDateTime": "30/11/2020 01:06:37.923098"}'
+        with patch('urllib.request.urlopen', return_value=io.StringIO(response)):
             with pytest.raises(ValueError):
                 what_is_year_now()
 
-    @patch('urllib.request.urlopen', io.StringIO)
-    def test_return_int(self):
-        fake_api_url = '{"currentDateTime": "30.11.2020 01:06:37.923098"}'
-        with patch('tests.code.what_is_year_now.API_URL', fake_api_url):
-            year = what_is_year_now()
+    def test_return_not_int(self):
+        response = '{"currentDateTime": "первое / февраль / двадцать первый"}'
+        with patch('urllib.request.urlopen', return_value=io.StringIO(response)):
+            with pytest.raises(ValueError):
+                what_is_year_now()
 
-        assert isinstance(year, int)
-
-    @patch('urllib.request.urlopen', io.StringIO)
     def test_raise_response_not_json(self):
-        fake_api_url = '"currentDateTime": "30/11/2020 01:06:37.923098"'
-        with patch('tests.code.what_is_year_now.API_URL', fake_api_url):
+        response = '"currentDateTime": "30/11/2020 01:06:37.923098"'
+        with patch('urllib.request.urlopen', return_value=io.StringIO(response)):
             with pytest.raises(json.JSONDecodeError):
                 what_is_year_now()
 
