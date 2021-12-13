@@ -16,10 +16,10 @@ def timed_output(function):
                 original_write(new_string)
 
         sys.stdout.write = my_write
-
-        function(*args, **kwargs)
-
+        result = function(*args, **kwargs)
         sys.stdout.write = original_write
+
+        return result
 
     return wrapper
 
