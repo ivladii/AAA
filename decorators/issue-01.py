@@ -12,7 +12,7 @@ def my_write(string_text):
         original_write(new_string)
 
 
-sys.stdout.write = my_write
-
 if __name__ == '__main__':
+    sys.stdout.write = my_write
     print('1, 2, 3')
+    sys.stdout.write = original_write

@@ -15,8 +15,10 @@ def redirect_output(filepath):
 
             original_write = sys.stdout.write
             sys.stdout.write = write_to_file
-            function(*args, **kwargs)
+            result = function(*args, **kwargs)
             sys.stdout.write = original_write
+
+            return result
 
         return wrapper
 
